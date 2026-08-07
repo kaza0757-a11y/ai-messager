@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BALE MESSAGER</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="brand">
+        <button id="mobileMenuBtn" class="mobile-menu-btn" aria-label="Open menu">☰</button>
+        <div class="brand-mark">BM</div>
+        <div>
+          <h1>BALE MESSAGER</h1>
+          <p>Real-time secure chat</p>
+        </div>
+      </div>
+      <div class="user-actions" id="userActions">
+        <span id="profileName"></span>
+        <button id="assistantBtn" class="secondary">Assistant</button>
+        <button id="changePasswordBtn">Change Password</button>
+        <button id="logoutBtn">Logout</button>
+      </div>
+    </header>
+
+    <main class="chat-layout">
+      <aside class="sidebar">
+        <div class="sidebar-panel">
+          <div class="sidebar-panel-top">
+            <input id="contactSearch" type="search" placeholder="Search contacts and groups..." />
+            <div class="sidebar-panel-actions">
+              <button id="newGroupBtn" type="button" class="secondary">New Group</button>
+              <button id="addAllBtn" type="button" class="secondary">Add All</button>
+            </div>
+          </div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-section-header">Groups</div>
+          <div id="groupsList" class="contacts-list"></div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-section-header">Contacts</div>
+          <div id="contactsList" class="contacts-list"></div>
+        </div>
+      </aside>
+
+      <section class="chat-main">
+        <div class="chat-header" id="chatHeader">
+          <div class="chat-contact">
+            <img id="chatContactAvatar" class="chat-contact-avatar" alt="avatar" src="/icons/icon-192.svg" />
+            <div class="chat-contact-info">
+              <span class="chat-header-title" id="chatContactName">Select a contact</span>
+              <span class="chat-header-status" id="chatHeaderStatus">No conversation selected</span>
+              <span class="chat-contact-email" id="chatContactEmail"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-panel hidden" id="adminPanel">
+          <div class="admin-panel-header">
+            <h3>Admin Dashboard</h3>
+            <p>System status and registered users.</p>
+          </div>
+          <div class="admin-stats" id="adminStats"></div>
+          <div class="admin-users-list" id="adminUsersList"></div>
+          <div class="admin-conversation">
+            <h4>View Private Conversation</h4>
+            <div class="form-group">
+              <label>User A ID</label>
+              <input id="adminUserA" type="number" placeholder="Sender user ID" />
+            </div>
+            <div class="form-group">
+              <label>User B ID</label>
+              <input id="adminUserB" type="number" placeholder="Receiver user ID" />
+            </div>
+            <div class="form-actions">
+              <button id="adminLoadConversationBtn" class="hidden">Load Conversation</button>
+            </div>
+            <div class="admin-conversation-view" id="adminConversationView"></div>
+          </div>
+        </div>
+
+        <div class="messages-view" id="messagesView">
+          <div class="empty-state" id="emptyState">
+            <h2>Welcome to BALE MESSAGER</h2>
+            <p>Choose a contact to start chatting in real time.</p>
+          </div>
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator"></div>
+
+        <div class="message-input-bar">
+          <textarea id="messageInput" placeholder="Type a message..."></textarea>
+          <input id="messageMediaInput" type="file" accept="image/*,audio/*,video/*,application/pdf,text/plain" hidden />
+          <button id="emojiBtn" type="button" class="secondary">😀</button>
+          <button id="recordVoiceBtn" type="button" class="secondary">🎙️</button>
+          <button id="attachMediaBtn" type="button" class="secondary">Attach</button>
+          <button id="sendMessageBtn">Send</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop hidden" id="authBackdrop"></div>
+
+  <section class="modal dialog" id="loginModal">
+    <div class="modal-panel">
+      <h2>Login</h2>
+      <div class="form-group">
+        <label>Email</label>
+        <input id="loginEmail" type="email" placeholder="you@example.com" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input id="loginPassword" type="password" placeholder="••••••••" />
+      </div>
+      <div class="form-actions">
+        <button id="loginBtn">Login</button>
+        <button id="showRegisterBtn" class="secondary">Register</button>
+      </div>
+            <div class="form-actions admin-login-actions">
+        <button id="showAdminLoginBtn" class="secondary hidden">Admin Login</button>
+      </div>
+      <p class="form-note" id="loginError"></p>
+    </div>
+  </section>
+
+  <section class="modal dialog hidden" id="adminLoginModal">
+    <div class="modal-panel">
+      <h2>Admin Login</h2>
+      <div class="form-group">
+        <label>Username</label>
+        <input id="adminUsername" type="text" placeholder="BALE" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input id="adminPassword" type="password" placeholder="••••••••" />
+      </div>
+      <div class="form-actions">
+        <button id="adminLoginBtn">Admin Login</button>
+        <button id="adminBackToLoginBtn" class="secondary">Back to user login</button>
+      </div>
+      <p class="form-note" id="adminLoginError"></p>
+    </div>
+  </section>
+
+  <section class="modal dialog hidden" id="changePasswordModal">
+    <div class="modal-panel">
+      <h2>Change Password</h2>
+      <div class="form-group">
+        <label>Current Password</label>
+        <input id="currentPassword" type="password" placeholder="Current password" />
+      </div>
+      <div class="form-group">
+        <label>New Password</label>
+        <input id="newPassword" type="password" placeholder="New password" />
+      </div>
+      <div class="form-group">
+        <label>Confirm Password</label>
+        <input id="confirmPassword" type="password" placeholder="Confirm new password" />
+      </div>
+      <div class="form-actions">
+        <button id="changePasswordSubmitBtn">Change Password</button>
+        <button id="changePasswordCancelBtn" class="secondary">Cancel</button>
+      </div>
+      <p class="form-note" id="changePasswordError"></p>
+    </div>
+  </section>
+
+  <section class="modal dialog hidden" id="registerModal">
+    <div class="modal-panel">
+      <h2>Register</h2>
+      <div class="form-group">
+        <label>Username</label>
+        <input id="registerUsername" type="text" placeholder="Unique display name" />
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input id="registerEmail" type="email" placeholder="you@example.com" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input id="registerPassword" type="password" placeholder="••••••••" />
+      </div>
+      <div class="form-actions">
+        <button id="registerBtn">Register</button>
+        <button id="backToLoginBtn" class="secondary">Back to login</button>
+      </div>
+      <p class="form-note" id="registerError"></p>
+    </div>
+  </section>
+
+  <section class="modal dialog hidden" id="confirmModal">
+    <div class="modal-panel">
+      <h2 id="confirmTitle">Confirm</h2>
+      <p id="confirmMessage">Are you sure?</p>
+      <div class="form-actions">
+        <button id="confirmYesBtn">Yes</button>
+        <button id="confirmNoBtn" class="secondary">Cancel</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="modal dialog hidden" id="assistantModal">
+    <div class="modal-panel">
+      <h2>AI Assistant</h2>
+      <div id="assistantChat" style="max-height:320px; overflow:auto; margin-bottom:12px; padding:8px; border-radius:12px; background:#f8fafc; border:1px solid var(--border);"></div>
+      <div style="display:flex; gap:8px;">
+        <input id="assistantInput" type="text" placeholder="Ask about the app, features, or how-tos" style="flex:1; padding:10px 12px; border-radius:999px; border:1px solid var(--border);" />
+        <button id="assistantSendBtn">Send</button>
+      </div>
+      <div style="margin-top:12px; display:flex; gap:8px; justify-content:flex-end;">
+        <button id="assistantCloseBtn" class="secondary">Close</button>
+      </div>
+    </div>
+  </section>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1d4ed8">
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
