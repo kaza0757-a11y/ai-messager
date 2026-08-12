@@ -1,22 +1,7 @@
-const fs = require('fs');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
 
-const isVercel = process.env.VERCEL || process.env.NOW_BUILDER;
-const dbPath = isVercel ? '/tmp/db.sqlite' : path.join(__dirname, 'db.sqlite');
-
-if (isVercel) {
-  const srcPath = path.join(__dirname, 'db.sqlite');
-  if (fs.existsSync(srcPath) && !fs.existsSync(dbPath)) {
-    try {
-      fs.copyFileSync(srcPath, dbPath);
-      console.log('Copied database template to /tmp/db.sqlite');
-    } catch (err) {
-      console.error('Failed to copy database template:', err);
-    }
-  }
-}
-
+const dbPath = path.join(__dirname, 'db.sqlite');
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
     console.error('Failed to open SQLite database:', err);

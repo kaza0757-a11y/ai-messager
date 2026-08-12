@@ -18,8 +18,7 @@ const sessions = new Map();
 const onlineUsers = new Map();
 const socketByUser = new Map();
 
-const isVercel = process.env.VERCEL || process.env.NOW_BUILDER;
-const uploadsDir = isVercel ? '/tmp/uploads' : path.join(__dirname, 'uploads');
+const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
@@ -158,34 +157,6 @@ async function ensureDefaultUsers() {
     }
   }
 }
-
-let dbInitialized = false;
-let initPromise = null;
-
-function ensureDbInitialized() {
-  if (!initPromise) {
-    initPromise = Promise.all([ensureAdminUser(), ensureDefaultUsers()])
-      .then(() => {
-        dbInitialized = true;
-        console.log('Database initialization completed.');
-      })
-      .catch((err) => {
-        console.error('Database initialization failed:', err);
-        throw err;
-      });
-  }
-  return initPromise;
-}
-
-// Middleware to ensure DB is initialized before serving requests
-app.use(async (req, res, next) => {
-  try {
-    await ensureDbInitialized();
-    next();
-  } catch (err) {
-    res.status(500).json({ error: 'Database initialization failed.' });
-  }
-});
 
 app.post('/api/register', async (req, res) => {
   const { username, email, password } = req.body;
@@ -792,21 +763,17 @@ io.on('connection', async (socket) => {
   });
 });
 
-if (!isVercel) {
-  ensureDbInitialized()
-    .then(() => {
-      server.listen(PORT, () => {
-        console.log(`BALE MESSAGER server running on http://localhost:${PORT}`);
-        if (process.env.ADMIN_EMAIL) {
-          console.log(`Admin login enabled for ${process.env.ADMIN_EMAIL}`);
-        }
-        console.log('Default users user1 and user2 are initialized.');
-      });
-    })
-    .catch((error) => {
-      console.error('Failed to initialize default users or admin user:', error);
-      process.exit(1);
+Promise.all([ensureAdminUser(), ensureDefaultUsers()])
+  .then(() => {
+    server.listen(PORT, () => {
+      console.log(`BALE MESSAGER server running on http://localhost:${PORT}`);
+      if (process.env.ADMIN_EMAIL) {
+        console.log(`Admin login enabled for ${process.env.ADMIN_EMAIL}`);
+      }
+      console.log('Default users user1 and user2 are initialized.');
     });
-}
-
-module.exports = app;
+  })
+  .catch((error) => {
+    console.error('Failed to initialize default users or admin user:', error);
+    process.exit(1);
+  });
